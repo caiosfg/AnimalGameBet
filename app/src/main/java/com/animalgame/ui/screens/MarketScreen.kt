@@ -65,13 +65,13 @@ fun MarketScreen(
         ) {
             Column {
                 Text(
-                    text = "Crypto Market",
+                    text = "Animal Game Bet",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Live Exchange & Trading",
+                    text = "Gerencie sua aposta diária",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -115,7 +115,7 @@ fun MarketScreen(
                 modifier = Modifier.padding(20.dp)
             ) {
                 Text(
-                    text = "Total Portfolio Balance",
+                    text = "Total utilizado este mês",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -127,7 +127,7 @@ fun MarketScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "$48,250.00",
+                        text = "R$250,00",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -145,19 +145,6 @@ fun MarketScreen(
                             color = CryptoGreen
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Quick Action Buttons (Deposit, Withdraw, Swap, Futures)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    QuickActionButton(context, "deposit", "Deposit")
-                    QuickActionButton(context, "withdraw", "Withdraw")
-                    QuickActionButton(context, "swap", "Swap")
-                    QuickActionButton(context, "futures", "Futures")
                 }
             }
         }
@@ -224,44 +211,7 @@ fun MarketScreen(
     }
 }
 
-@Composable
-private fun QuickActionButton(
-    context: android.content.Context,
-    iconName: String,
-    label: String
-) {
-    val resId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { }
-    ) {
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(MaterialTheme.colorScheme.background)
-                .padding(10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            if (resId != 0) {
-                Image(
-                    painter = painterResource(id = resId),
-                    contentDescription = label,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text(label.take(1), fontWeight = FontWeight.Bold)
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
+
 
 @Composable
 private fun CryptoListItem(
