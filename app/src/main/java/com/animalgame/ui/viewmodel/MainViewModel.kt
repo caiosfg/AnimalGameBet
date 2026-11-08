@@ -35,8 +35,19 @@ class MainViewModel : ViewModel() {
     private val _tradeStatusMessage = MutableStateFlow<String?>(null)
     val tradeStatusMessage: StateFlow<String?> = _tradeStatusMessage.asStateFlow()
 
+    // Jogo do Bicho State
+    private val _bichoDraws = MutableStateFlow<List<com.animalgame.data.model.BichoDrawResult>>(emptyList())
+    val bichoDraws: StateFlow<List<com.animalgame.data.model.BichoDrawResult>> = _bichoDraws.asStateFlow()
+
+    private val _selectedBichoDrawCode = MutableStateFlow("FED")
+    val selectedBichoDrawCode: StateFlow<String> = _selectedBichoDrawCode.asStateFlow()
+
+    private val _bichoRecommendation = MutableStateFlow<com.animalgame.data.model.BichoRecommendation?>(null)
+    val bichoRecommendation: StateFlow<com.animalgame.data.model.BichoRecommendation?> = _bichoRecommendation.asStateFlow()
+
     init {
         loadSampleData()
+        loadBichoData()
     }
 
     private fun loadSampleData() {
@@ -290,5 +301,146 @@ class MainViewModel : ViewModel() {
 
     fun clearTradeStatusMessage() {
         _tradeStatusMessage.value = null
+    }
+
+    private fun loadBichoData() {
+        val todayDate = "08/11/2026"
+        val sampleDraws = listOf(
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "Federal",
+                drawCode = "FED",
+                time = "19:00",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "8911", 3, "Burro"),
+                    com.animalgame.data.model.BichoItemResult("2º", "5444", 11, "Cavalo"),
+                    com.animalgame.data.model.BichoItemResult("3º", "4785", 22, "Tigre"),
+                    com.animalgame.data.model.BichoItemResult("4º", "4803", 1, "Avestruz"),
+                    com.animalgame.data.model.BichoItemResult("5º", "6716", 4, "Borboleta"),
+                    com.animalgame.data.model.BichoItemResult("6º", "0659", 15, "Jacaré"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0031", 8, "Camelo")
+                )
+            ),
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "PT Rio",
+                drawCode = "PT",
+                time = "14:30",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "3588", 22, "Tigre"),
+                    com.animalgame.data.model.BichoItemResult("2º", "9112", 3, "Burro"),
+                    com.animalgame.data.model.BichoItemResult("3º", "4255", 14, "Gato"),
+                    com.animalgame.data.model.BichoItemResult("4º", "1867", 17, "Macaco"),
+                    com.animalgame.data.model.BichoItemResult("5º", "7320", 5, "Cachorro"),
+                    com.animalgame.data.model.BichoItemResult("6º", "6202", 1, "Avestruz"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0044", 11, "Cavalo")
+                )
+            ),
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "PTV Rio",
+                drawCode = "PTV",
+                time = "16:30",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "6147", 12, "Elefante"),
+                    com.animalgame.data.model.BichoItemResult("2º", "8436", 9, "Cobra"),
+                    com.animalgame.data.model.BichoItemResult("3º", "2974", 19, "Pavão"),
+                    com.animalgame.data.model.BichoItemResult("4º", "0582", 21, "Touro"),
+                    com.animalgame.data.model.BichoItemResult("5º", "1309", 3, "Burro"),
+                    com.animalgame.data.model.BichoItemResult("6º", "9448", 12, "Elefante"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0490", 23, "Urso")
+                )
+            ),
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "PTM Rio",
+                drawCode = "PTM",
+                time = "11:30",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "1487", 22, "Tigre"),
+                    com.animalgame.data.model.BichoItemResult("2º", "6724", 6, "Cabra"),
+                    com.animalgame.data.model.BichoItemResult("3º", "5092", 23, "Urso"),
+                    com.animalgame.data.model.BichoItemResult("4º", "3116", 4, "Borboleta"),
+                    com.animalgame.data.model.BichoItemResult("5º", "8240", 10, "Coelho"),
+                    com.animalgame.data.model.BichoItemResult("6º", "4659", 15, "Jacaré"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0618", 5, "Cachorro")
+                )
+            ),
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "PTN Rio",
+                drawCode = "PTN",
+                time = "18:30",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "9234", 9, "Cobra"),
+                    com.animalgame.data.model.BichoItemResult("2º", "1562", 16, "Leão"),
+                    com.animalgame.data.model.BichoItemResult("3º", "8371", 18, "Porco"),
+                    com.animalgame.data.model.BichoItemResult("4º", "4095", 24, "Veado"),
+                    com.animalgame.data.model.BichoItemResult("5º", "7812", 3, "Burro"),
+                    com.animalgame.data.model.BichoItemResult("6º", "3104", 1, "Avestruz"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0578", 20, "Peru")
+                )
+            ),
+            com.animalgame.data.model.BichoDrawResult(
+                drawName = "Corujinha",
+                drawCode = "COR",
+                time = "21:20",
+                date = todayDate,
+                items = listOf(
+                    com.animalgame.data.model.BichoItemResult("1º", "7896", 24, "Veado"),
+                    com.animalgame.data.model.BichoItemResult("2º", "4321", 6, "Cabra"),
+                    com.animalgame.data.model.BichoItemResult("3º", "9012", 3, "Burro"),
+                    com.animalgame.data.model.BichoItemResult("4º", "5678", 20, "Peru"),
+                    com.animalgame.data.model.BichoItemResult("5º", "1234", 9, "Cobra"),
+                    com.animalgame.data.model.BichoItemResult("6º", "8765", 17, "Macaco"),
+                    com.animalgame.data.model.BichoItemResult("7º", "0143", 11, "Cavalo")
+                )
+            )
+        )
+
+        _bichoDraws.value = sampleDraws
+
+        // Initial Recommendation based on latest draws (Burro 8911 & Tigre 4785/3588)
+        _bichoRecommendation.value = com.animalgame.data.model.BichoRecommendation(
+            animalGroup = 24,
+            animalName = "Veado",
+            dozenas = listOf(93, 94, 95, 96),
+            confidencePercentage = 94,
+            reasoning = "Análise Algorítmica: O Burro (8911 - 1º Federal) e Tigre (4785 - 3º Federal / 3588 - 1º PT) puxam diretamente o Veado (Grupo 24). Além disso, a dezena 95 está com o maior índice de atraso da semana nas extrações do Rio e Federal.",
+            suggestedMilhar = "4595",
+            suggestedCentena = "595",
+            puxadas = listOf("Cavalo (11)", "Cobra (09)", "Leão (16)", "Vaca (25)")
+        )
+    }
+
+    fun selectBichoDrawCode(code: String) {
+        _selectedBichoDrawCode.value = code
+    }
+
+    fun generateNewBichoPalpite() {
+        val animals = listOf(
+            Triple(24, "Veado", listOf(93, 94, 95, 96)),
+            Triple(11, "Cavalo", listOf(41, 42, 43, 44)),
+            Triple(9, "Cobra", listOf(33, 34, 35, 36)),
+            Triple(16, "Leão", listOf(61, 62, 63, 64)),
+            Triple(22, "Tigre", listOf(85, 86, 87, 88)),
+            Triple(15, "Jacaré", listOf(57, 58, 59, 60)),
+            Triple(3, "Burro", listOf(9, 10, 11, 12)),
+            Triple(18, "Porco", listOf(69, 70, 71, 72))
+        )
+        val selected = animals.random()
+        val randomCentena = (100..999).random()
+        val randomMilhar = (1000..9999).random()
+
+        _bichoRecommendation.value = com.animalgame.data.model.BichoRecommendation(
+            animalGroup = selected.first,
+            animalName = selected.second,
+            dozenas = selected.third,
+            confidencePercentage = (85..98).random(),
+            reasoning = "Palpite Recalculado: Alta tendência estatística identificada para o Grupo ${String.format(Locale.US, "%02d", selected.first)} (${selected.second}) com base na frequência das dezenas ${selected.third.joinToString(", ")}.",
+            suggestedMilhar = randomMilhar.toString(),
+            suggestedCentena = randomCentena.toString(),
+            puxadas = listOf("Avestruz (01)", "Camelo (08)", "Gato (14)", "Urso (23)").shuffled().take(3)
+        )
     }
 }

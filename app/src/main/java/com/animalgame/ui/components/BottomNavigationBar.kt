@@ -9,7 +9,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -24,9 +23,9 @@ sealed class BottomNavItem(
     val iconName: String
 ) {
     object Home : BottomNavItem("home", "Home", "market")
+    object Bicho : BottomNavItem("bicho", "Deu no Poste", "shiba")
     object Explorer : BottomNavItem("explorer", "Explorer", "swap")
-    object Bookmark : BottomNavItem("bookmark", "Bookmark", "favorite")
-    object Chart : BottomNavItem("chart", "Chart", "trade")
+    object Bookmark : BottomNavItem("bookmark", "Watchlist", "favorite")
     object Profile : BottomNavItem("profile", "Profile", "profile")
 }
 
@@ -38,9 +37,9 @@ fun BottomNavigationBar(
 ) {
     val items = listOf(
         BottomNavItem.Home,
+        BottomNavItem.Bicho,
         BottomNavItem.Explorer,
         BottomNavItem.Bookmark,
-        BottomNavItem.Chart,
         BottomNavItem.Profile
     )
 
@@ -87,9 +86,10 @@ fun BottomNavigationBar(
                 label = {
                     Text(
                         text = item.title,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) activeColor else inactiveColor
+                        color = if (isSelected) activeColor else inactiveColor,
+                        maxLines = 1
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(

@@ -56,6 +56,12 @@ fun AppNavigation(
                 )
             }
 
+            composable("bicho") {
+                JogoDoBichoScreen(
+                    viewModel = mainViewModel
+                )
+            }
+
             composable("explorer") {
                 ExplorerScreen(
                     viewModel = mainViewModel,
