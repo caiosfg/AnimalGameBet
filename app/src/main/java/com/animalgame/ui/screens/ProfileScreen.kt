@@ -1,5 +1,6 @@
 package com.animalgame.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,15 +21,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.animalgame.ui.theme.CryptoGreen
+import com.animalgame.ui.theme.CryptoRed
+import com.animalgame.ui.viewmodel.MainViewModel
+import java.util.Locale
 
 @Composable
 fun ProfileScreen(
+    viewModel: MainViewModel? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val profileResId = context.resources.getIdentifier("profile", "drawable", context.packageName)
-    val settingsResId = context.resources.getIdentifier("settings", "drawable", context.packageName)
     val walletResId = context.resources.getIdentifier("wallet", "drawable", context.packageName)
+
+    val valorInicial = viewModel?.valorInicialDia?.collectAsState()?.value ?: 0.0
+    val apostas = viewModel?.apostas?.collectAsState()?.value ?: emptyList()
+
+    val totalApostado = apostas.sumOf { it.valorApostado }
+    val totalGanho = apostas.sumOf { it.valorGanho }
+    val lucroLiquido = totalGanho - totalApostado
+    val saldoAtual = valorInicial + lucroLiquido
 
     Column(
         modifier = modifier
@@ -40,7 +54,7 @@ fun ProfileScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "My Profile",
+                text = "Meu Perfil",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -48,26 +62,20 @@ fun ProfileScreen(
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable { }
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(CryptoGreen.copy(alpha = 0.15f))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
-                if (settingsResId != 0) {
-                    Image(
-                        painter = painterResource(id = settingsResId),
-                        contentDescription = "Settings",
-                        modifier = Modifier.size(20.dp)
-                    )
-                } else {
-                    Text("⚙️", fontSize = 16.sp)
-                }
+                Text(
+                    text = "Apostador VIP",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = CryptoGreen
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // User Profile Card
         Card(
@@ -105,13 +113,13 @@ fun ProfileScreen(
 
                 Column {
                     Text(
-                        text = "Alex Trader",
+                        text = "Apostador Pro",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "alex.trader@cryptoapp.com",
+                        text = "apostador@deunoposte.com",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -123,7 +131,7 @@ fun ProfileScreen(
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "Verified Trader (Tier 3)",
+                            text = "Conta Verificada",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = CryptoGreen
@@ -135,20 +143,17 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Wallet Balance Summary
+        // Resumo da Banca
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             )
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -157,72 +162,75 @@ fun ProfileScreen(
                     if (walletResId != 0) {
                         Image(
                             painter = painterResource(id = walletResId),
-                            contentDescription = "Wallet",
+                            contentDescription = "Banca",
                             modifier = Modifier.size(28.dp)
                         )
                     } else {
                         Text("👛", fontSize = 20.sp)
                     }
+
                     Column {
                         Text(
-                            text = "Spot Wallet",
-                            fontSize = 14.sp,
+                            text = "Saldo Atual Hoje",
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "$48,250.00 USDT",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
+                            text = "R$ ${String.format(Locale.US, "%,.2f", saldoAtual)}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant, thickness = 1.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("Valor Inicial", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("R$ ${String.format(Locale.US, "%,.2f", valorInicial)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                    Column {
+                        Text("Total Apostado", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("R$ ${String.format(Locale.US, "%,.2f", totalApostado)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text("Total Ganho", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("R$ ${String.format(Locale.US, "%,.2f", totalGanho)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = CryptoGreen)
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Profile Menu Items
-        val menuItems = listOf(
-            "Account Security",
-            "Payment Methods",
-            "API Management",
-            "Notification Preferences",
-            "Help & Support"
-        )
-
-        menuItems.forEach { item ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                onClick = { }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = item,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "›",
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+        // Botão para Resetar Dia
+        Button(
+            onClick = {
+                viewModel?.resetarDia()
+                Toast.makeText(context, "Dia reiniciado e banca zerada!", Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = CryptoRed
+            )
+        ) {
+            Text(
+                text = "🔄 REINICIAR BANCA DO DIA (ZERAR R$ 0,00)",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = androidx.compose.ui.graphics.Color.White
+            )
         }
     }
 }

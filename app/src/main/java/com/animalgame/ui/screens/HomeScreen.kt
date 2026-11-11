@@ -3,10 +3,7 @@ package com.animalgame.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -41,7 +38,6 @@ fun HomeScreen(
     val apostas by viewModel.apostas.collectAsState()
 
     var editingValorText by remember { mutableStateOf(if (valorInicial > 0) String.format(Locale.US, "%.2f", valorInicial) else "0.00") }
-    var isEditingValor by remember { mutableStateOf(false) }
 
     val totalApostado = apostas.sumOf { it.valorApostado }
     val totalGanho = apostas.sumOf { it.valorGanho }
@@ -150,7 +146,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Campo para informar/editar o Valor Inicial do Dia (Sempre inicia com 0.00)
+                // Campo para informar/editar o Valor Inicial do Dia
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -203,7 +199,7 @@ fun HomeScreen(
                             onClick = {
                                 val novoVal = editingValorText.toDoubleOrNull() ?: 0.0
                                 viewModel.setValorInicialDia(novoVal)
-                                Toast.makeText(context, "Valor inicial do dia atualizado!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Valor inicial do dia atualizado para R$ ${String.format(Locale.US, "%.2f", novoVal)}!", Toast.LENGTH_SHORT).show()
                             },
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -217,7 +213,7 @@ fun HomeScreen(
                             onClick = {
                                 viewModel.resetarDia()
                                 editingValorText = "0.00"
-                                Toast.makeText(context, "Dia reiniciado para R$ 0,00!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Dia reiniciado e banca zerada!", Toast.LENGTH_SHORT).show()
                             },
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -249,42 +245,44 @@ fun HomeScreen(
             }
         }
 
-        // 2. ATALHOS RÁPIDOS
+        // 2. ATALHOS RÁPIDOS (Button estilizados)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Card(
+            Button(
+                onClick = { onNavigateToRegistrar() },
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateToRegistrar() },
+                    .height(84.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                contentPadding = PaddingValues(12.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("✍️", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("✍️", fontSize = 22.sp)
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text("Registrar Jogo", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Text("Conferir Aposta", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
-            Card(
+            Button(
+                onClick = { onNavigateToResultados() },
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { onNavigateToResultados() },
+                    .height(84.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                contentPadding = PaddingValues(12.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("📜", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("📜", fontSize = 22.sp)
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text("Deu no Poste", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Text("Ver Sorteios", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

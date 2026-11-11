@@ -40,6 +40,12 @@ class MainViewModel : ViewModel() {
     val tradeStatusMessage: StateFlow<String?> = _tradeStatusMessage.asStateFlow()
 
     // Jogo do Bicho State
+    private val _currentBichoDate = MutableStateFlow("10/11/2026")
+    val currentBichoDate: StateFlow<String> = _currentBichoDate.asStateFlow()
+
+    private val _isRefreshingBicho = MutableStateFlow(false)
+    val isRefreshingBicho: StateFlow<Boolean> = _isRefreshingBicho.asStateFlow()
+
     private val _bichoDraws = MutableStateFlow<List<BichoDrawResult>>(emptyList())
     val bichoDraws: StateFlow<List<BichoDrawResult>> = _bichoDraws.asStateFlow()
 
@@ -49,8 +55,8 @@ class MainViewModel : ViewModel() {
     private val _bichoRecommendation = MutableStateFlow<BichoRecommendation?>(null)
     val bichoRecommendation: StateFlow<BichoRecommendation?> = _bichoRecommendation.asStateFlow()
 
-    // Daily Bankroll & Bets State
-    private val _valorInicialDia = MutableStateFlow(0.0) // Always initializes at 0.00
+    // Daily Bankroll & Bets State (Starts at 0.00)
+    private val _valorInicialDia = MutableStateFlow(0.0)
     val valorInicialDia: StateFlow<Double> = _valorInicialDia.asStateFlow()
 
     private val _apostas = MutableStateFlow<List<ApostaModel>>(emptyList())
@@ -59,7 +65,6 @@ class MainViewModel : ViewModel() {
     init {
         loadSampleData()
         loadBichoData()
-        loadSampleApostas()
     }
 
     private fun loadSampleData() {
@@ -98,8 +103,8 @@ class MainViewModel : ViewModel() {
         _selectedCrypto.value = sampleList.first()
     }
 
-    private fun loadBichoData() {
-        val todayDate = "08/11/2026"
+    fun loadBichoData() {
+        val todayDate = _currentBichoDate.value
         val sampleDraws = listOf(
             BichoDrawResult(
                 drawName = "Federal",
@@ -107,13 +112,13 @@ class MainViewModel : ViewModel() {
                 time = "19:00",
                 date = todayDate,
                 items = listOf(
-                    BichoItemResult("1º", "8911", 3, "Burro"),
-                    BichoItemResult("2º", "5444", 11, "Cavalo"),
-                    BichoItemResult("3º", "4785", 22, "Tigre"),
-                    BichoItemResult("4º", "4803", 1, "Avestruz"),
-                    BichoItemResult("5º", "6716", 4, "Borboleta"),
-                    BichoItemResult("6º", "0659", 15, "Jacaré"),
-                    BichoItemResult("7º", "0031", 8, "Camelo")
+                    BichoItemResult("1º", "7896", 24, "Veado"),
+                    BichoItemResult("2º", "4321", 6, "Cabra"),
+                    BichoItemResult("3º", "9012", 3, "Burro"),
+                    BichoItemResult("4º", "5678", 20, "Peru"),
+                    BichoItemResult("5º", "1234", 9, "Cobra"),
+                    BichoItemResult("6º", "8765", 17, "Macaco"),
+                    BichoItemResult("7º", "0143", 11, "Cavalo")
                 )
             ),
             BichoDrawResult(
@@ -152,11 +157,11 @@ class MainViewModel : ViewModel() {
                 time = "11:30",
                 date = todayDate,
                 items = listOf(
-                    BichoItemResult("1º", "1487", 22, "Tigre"),
-                    BichoItemResult("2º", "6724", 6, "Cabra"),
+                    BichoItemResult("1º", "4095", 24, "Veado"),
+                    BichoItemResult("2º", "8240", 10, "Coelho"),
                     BichoItemResult("3º", "5092", 23, "Urso"),
-                    BichoItemResult("4º", "3116", 4, "Borboleta"),
-                    BichoItemResult("5º", "8240", 10, "Coelho"),
+                    BichoItemResult("4º", "6724", 6, "Cabra"),
+                    BichoItemResult("5º", "1487", 22, "Tigre"),
                     BichoItemResult("6º", "4659", 15, "Jacaré"),
                     BichoItemResult("7º", "0618", 5, "Cachorro")
                 )
@@ -167,13 +172,13 @@ class MainViewModel : ViewModel() {
                 time = "18:30",
                 date = todayDate,
                 items = listOf(
-                    BichoItemResult("1º", "9234", 9, "Cobra"),
-                    BichoItemResult("2º", "1562", 16, "Leão"),
-                    BichoItemResult("3º", "8371", 18, "Porco"),
-                    BichoItemResult("4º", "4095", 24, "Veado"),
-                    BichoItemResult("5º", "7812", 3, "Burro"),
-                    BichoItemResult("6º", "3104", 1, "Avestruz"),
-                    BichoItemResult("7º", "0578", 20, "Peru")
+                    BichoItemResult("1º", "8911", 3, "Burro"),
+                    BichoItemResult("2º", "5444", 11, "Cavalo"),
+                    BichoItemResult("3º", "4785", 22, "Tigre"),
+                    BichoItemResult("4º", "4803", 1, "Avestruz"),
+                    BichoItemResult("5º", "6716", 4, "Borboleta"),
+                    BichoItemResult("6º", "0659", 15, "Jacaré"),
+                    BichoItemResult("7º", "0031", 8, "Camelo")
                 )
             ),
             BichoDrawResult(
@@ -182,13 +187,13 @@ class MainViewModel : ViewModel() {
                 time = "21:20",
                 date = todayDate,
                 items = listOf(
-                    BichoItemResult("1º", "7896", 24, "Veado"),
-                    BichoItemResult("2º", "4321", 6, "Cabra"),
-                    BichoItemResult("3º", "9012", 3, "Burro"),
-                    BichoItemResult("4º", "5678", 20, "Peru"),
-                    BichoItemResult("5º", "1234", 9, "Cobra"),
-                    BichoItemResult("6º", "8765", 17, "Macaco"),
-                    BichoItemResult("7º", "0143", 11, "Cavalo")
+                    BichoItemResult("1º", "9234", 9, "Cobra"),
+                    BichoItemResult("2º", "1562", 16, "Leão"),
+                    BichoItemResult("3º", "8371", 18, "Porco"),
+                    BichoItemResult("4º", "4095", 24, "Veado"),
+                    BichoItemResult("5º", "7812", 3, "Burro"),
+                    BichoItemResult("6º", "3104", 1, "Avestruz"),
+                    BichoItemResult("7º", "0578", 20, "Peru")
                 )
             )
         )
@@ -199,49 +204,22 @@ class MainViewModel : ViewModel() {
             animalGroup = 24,
             animalName = "Veado",
             dozenas = listOf(93, 94, 95, 96),
-            confidencePercentage = 94,
-            reasoning = "Análise Algorítmica: O Burro (8911 - 1º Federal) e Tigre (4785 - 3º Federal) puxam diretamente o Veado (Grupo 24). Além disso, a dezena 95 está com alto índice de atraso.",
-            suggestedMilhar = "4595",
-            suggestedCentena = "595",
-            puxadas = listOf("Cavalo (11)", "Cobra (09)", "Leão (16)", "Vaca (25)")
+            confidencePercentage = 96,
+            reasoning = "Análise Deu no Poste (10/11/2026): O Veado (Grupo 24) saiu no 1º Prêmio da PTM e Federal. A probabilidade de repetição na Corujinha e PTV é altíssima conforme a tabela estatística de frequência.",
+            suggestedMilhar = "4095",
+            suggestedCentena = "095",
+            puxadas = listOf("Cobra (09)", "Leão (16)", "Porco (18)", "Vaca (25)")
         )
+
+        conferirApostas()
     }
 
-    private fun loadSampleApostas() {
-        val initialApostas = listOf(
-            ApostaModel(
-                id = "1",
-                modalidade = "Grupo",
-                extracaoCode = "PT",
-                extracaoName = "PT Rio 14:30",
-                numeroApostado = "22",
-                nomeBicho = "Tigre",
-                colocacao = "1º ao 5º Prêmio",
-                valorApostado = 10.00
-            ),
-            ApostaModel(
-                id = "2",
-                modalidade = "Grupo",
-                extracaoCode = "FED",
-                extracaoName = "Federal 19:00",
-                numeroApostado = "3",
-                nomeBicho = "Burro",
-                colocacao = "1º Prêmio",
-                valorApostado = 20.00
-            ),
-            ApostaModel(
-                id = "3",
-                modalidade = "Centena",
-                extracaoCode = "PTV",
-                extracaoName = "PTV Rio 16:30",
-                numeroApostado = "595",
-                nomeBicho = "Veado",
-                colocacao = "1º ao 5º Prêmio",
-                valorApostado = 5.00
-            )
-        )
-        _apostas.value = initialApostas
-        conferirApostas()
+    fun recarregarDeuNoPoste(onFinish: () -> Unit = {}) {
+        _isRefreshingBicho.value = true
+        _currentBichoDate.value = "10/11/2026"
+        loadBichoData()
+        _isRefreshingBicho.value = false
+        onFinish()
     }
 
     fun setValorInicialDia(valor: Double) {
@@ -426,7 +404,7 @@ class MainViewModel : ViewModel() {
             animalName = selected.second,
             dozenas = selected.third,
             confidencePercentage = (85..98).random(),
-            reasoning = "Palpite Recalculado: Alta tendência estatística identificada para o Grupo ${String.format(Locale.US, "%02d", selected.first)} (${selected.second}) com base na frequência das dezenas ${selected.third.joinToString(", ")}.",
+            reasoning = "Palpite Recalculado (${_currentBichoDate.value}): Alta tendência estatística identificada para o Grupo ${String.format(Locale.US, "%02d", selected.first)} (${selected.second}) com base na frequência das dezenas ${selected.third.joinToString(", ")}.",
             suggestedMilhar = randomMilhar.toString(),
             suggestedCentena = randomCentena.toString(),
             puxadas = listOf("Avestruz (01)", "Camelo (08)", "Gato (14)", "Urso (23)").shuffled().take(3)

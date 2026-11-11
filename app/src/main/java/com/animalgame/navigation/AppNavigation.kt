@@ -1,17 +1,12 @@
 package com.animalgame.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.animalgame.ui.components.BottomNavigationBar
 import com.animalgame.ui.screens.*
 import com.animalgame.ui.viewmodel.MainViewModel
@@ -20,58 +15,39 @@ import com.animalgame.ui.viewmodel.MainViewModel
 fun AppNavigation(
     mainViewModel: MainViewModel = viewModel()
 ) {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    var selectedTab by remember { mutableStateOf("home") }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomNavigationBar(
-                currentRoute = currentRoute,
+                currentRoute = selectedTab,
                 onNavigate = { route ->
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    selectedTab = route
                 }
             )
         }
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            composable("home") {
-                HomeScreen(
+            when (selectedTab) {
+                "home" -> HomeScreen(
                     viewModel = mainViewModel,
-                    onNavigateToRegistrar = {
-                        navController.navigate("registrar")
-                    },
-                    onNavigateToResultados = {
-                        navController.navigate("bicho")
-                    }
+                    onNavigateToRegistrar = { selectedTab = "registrar" },
+                    onNavigateToResultados = { selectedTab = "bicho" }
                 )
-            }
-
-            composable("bicho") {
-                JogoDoBichoScreen(
+                "bicho" -> JogoDoBichoScreen(
                     viewModel = mainViewModel
                 )
-            }
-
-            composable("registrar") {
-                RegistrarJogoScreen(
+                "registrar" -> RegistrarJogoScreen(
                     viewModel = mainViewModel
                 )
-            }
-
-            composable("profile") {
-                ProfileScreen()
+                "profile" -> ProfileScreen(
+                    viewModel = mainViewModel
+                )
             }
         }
     }

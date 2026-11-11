@@ -3,7 +3,6 @@ package com.animalgame.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,14 +20,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.animalgame.data.model.BichoDrawResult
-import com.animalgame.data.model.BichoRecommendation
 import com.animalgame.ui.theme.CryptoGreen
 import com.animalgame.ui.theme.CryptoGreenBg
 import com.animalgame.ui.theme.CryptoPrimary
-import com.animalgame.ui.theme.CryptoRed
-import com.animalgame.ui.theme.CryptoRedBg
 import com.animalgame.ui.viewmodel.MainViewModel
+import java.util.Locale
 
 @Composable
 fun JogoDoBichoScreen(
@@ -39,6 +35,8 @@ fun JogoDoBichoScreen(
     val draws by viewModel.bichoDraws.collectAsState()
     val selectedDrawCode by viewModel.selectedBichoDrawCode.collectAsState()
     val recommendation by viewModel.bichoRecommendation.collectAsState()
+    val currentDate by viewModel.currentBichoDate.collectAsState()
+    val isRefreshing by viewModel.isRefreshingBicho.collectAsState()
 
     val currentDraw = draws.find { it.drawCode == selectedDrawCode } ?: draws.firstOrNull()
 
@@ -70,15 +68,22 @@ fun JogoDoBichoScreen(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(CryptoGreenBg)
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            // Reload Button for Deu no Poste
+            Button(
+                onClick = {
+                    viewModel.recarregarDeuNoPoste {
+                        Toast.makeText(context, "Resultados do Deu no Poste atualizados para $currentDate!", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CryptoGreenBg
+                ),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "LIVE 08/11",
-                    fontSize = 11.sp,
+                    text = if (isRefreshing) "⏳ Atualizando..." else "🔄 $currentDate",
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = CryptoGreen
                 )
@@ -279,13 +284,29 @@ fun JogoDoBichoScreen(
             }
         }
 
-        // 2. DRAW RESULTS SECTION ("DEU NO POSTE - HOJE")
-        Text(
-            text = "Resultados - Deu no Poste",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        // 2. DRAW RESULTS SECTION ("DEU NO POSTE - HOJE 10/11")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Resultados - Deu no Poste ($currentDate)",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            TextButton(
+                onClick = {
+                    viewModel.recarregarDeuNoPoste {
+                        Toast.makeText(context, "Sorteios do Deu no Poste atualizados!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            ) {
+                Text("🔄 Atualizar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+        }
 
         // Draw Tabs (Federal, PT, PTV, PTM, PTN, COR)
         LazyRow(
@@ -373,7 +394,6 @@ fun JogoDoBichoScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Position
                             Text(
                                 text = item.position,
                                 fontSize = 13.sp,
@@ -382,7 +402,6 @@ fun JogoDoBichoScreen(
                                 modifier = Modifier.weight(0.8f)
                             )
 
-                            // Milhar
                             Text(
                                 text = item.milhar,
                                 fontSize = 15.sp,
@@ -391,16 +410,14 @@ fun JogoDoBichoScreen(
                                 modifier = Modifier.weight(1.2f)
                             )
 
-                            // Grupo
                             Text(
-                                text = String.format(java.util.Locale.US, "%02d", item.grupo),
+                                text = String.format(Locale.US, "%02d", item.grupo),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.weight(1f)
                             )
 
-                            // Animal Name
                             Text(
                                 text = item.animalName,
                                 fontSize = 14.sp,
@@ -485,7 +502,7 @@ fun JogoDoBichoScreen(
                                 ) {
                                     Column {
                                         Text(
-                                            text = "G${String.format(java.util.Locale.US, "%02d", bicho.first)} • ${bicho.second}",
+                                            text = "G${String.format(Locale.US, "%02d", bicho.first)} • ${bicho.second}",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onSurface
