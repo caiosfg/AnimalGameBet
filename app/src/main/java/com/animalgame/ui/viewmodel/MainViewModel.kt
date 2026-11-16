@@ -252,55 +252,171 @@ class MainViewModel : ViewModel() {
                     "1º Prêmio" -> 1
                     "1º ao 5º Prêmio" -> 5
                     "1º ao 7º Prêmio" -> 7
+                    "1º e 2º Prêmio" -> 2
+                    "2º e 3º Prêmio" -> 3
+                    "3º e 4º Prêmio" -> 4
+                    "4º e 5º Prêmio" -> 5
                     else -> 5
                 }
                 val checkItems = draw.items.take(maxPosIndex)
-                val numApostado = aposta.numeroApostado.trim()
-                val grupoApostado = numApostado.toIntOrNull()
 
-                var matches = 0
-                val matchingPositions = mutableListOf<String>()
+                val isWin: Boolean
+                val winningDetails: String
+                var ganhoTotal = 0.0
 
-                checkItems.forEach { item ->
-                    val isMatch = when (aposta.modalidade) {
-                        "Grupo" -> (grupoApostado != null && item.grupo == grupoApostado) || item.animalName.equals(aposta.nomeBicho, ignoreCase = true)
-                        "Dezena" -> item.dezena == numApostado || item.milhar.endsWith(numApostado)
-                        "Centena" -> item.centena == numApostado || item.milhar.endsWith(numApostado)
-                        "Milhar" -> item.milhar == numApostado
-                        else -> item.grupo == grupoApostado
+                when (aposta.modalidade) {
+                    "Grupo" -> {
+                        val grupoBuscado = aposta.gruposSelecionados.firstOrNull() ?: aposta.numeroApostado.toIntOrNull() ?: 1
+                        val matchItem = checkItems.find { it.grupo == grupoBuscado }
+                        isWin = matchItem != null
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (18.0 / div)
+                            winningDetails = "Grupo $grupoBuscado sorteado no ${matchItem?.position}"
+                        } else {
+                            winningDetails = "Grupo $grupoBuscado não sorteado nesta extração"
+                        }
                     }
-                    if (isMatch) {
-                        matches++
-                        matchingPositions.add(item.position)
+
+                    "Dupla de Grupo" -> {
+                        val gruposNecessarios = aposta.gruposSelecionados
+                        val gruposSorteados = checkItems.map { it.grupo }.toSet()
+                        val hitAll = gruposNecessarios.size >= 2 && gruposNecessarios.all { it in gruposSorteados }
+                        isWin = hitAll
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (18.5 / div)
+                            winningDetails = "Dupla de Grupos ${gruposNecessarios.joinToString(", ")} sorteada!"
+                        } else {
+                            winningDetails = "Dupla de Grupos não saiu completamente"
+                        }
+                    }
+
+                    "Terno de Grupo" -> {
+                        val gruposNecessarios = aposta.gruposSelecionados
+                        val gruposSorteados = checkItems.map { it.grupo }.toSet()
+                        val hitAll = gruposNecessarios.size >= 3 && gruposNecessarios.all { it in gruposSorteados }
+                        isWin = hitAll
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (130.0 / div)
+                            winningDetails = "Terno de Grupos ${gruposNecessarios.joinToString(", ")} sorteado!"
+                        } else {
+                            winningDetails = "Terno de Grupos não saiu completo"
+                        }
+                    }
+
+                    "Dezena" -> {
+                        val dezenaBuscada = aposta.numeroApostado.trim()
+                        val matchItem = checkItems.find { it.dezena == dezenaBuscada }
+                        isWin = matchItem != null
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (60.0 / div)
+                            winningDetails = "Dezena $dezenaBuscada sorteada no ${matchItem?.position}"
+                        } else {
+                            winningDetails = "Dezena $dezenaBuscada não sorteada"
+                        }
+                    }
+
+                    "Duque de Dezenas" -> {
+                        val dezenasBuscadas = aposta.dezenasSelecionadas
+                        val dezenasSorteadas = checkItems.map { it.dezena }.toSet()
+                        val hitAll = dezenasBuscadas.size >= 2 && dezenasBuscadas.all { it in dezenasSorteadas }
+                        isWin = hitAll
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (300.0 / div)
+                            winningDetails = "Duque de Dezenas ${dezenasBuscadas.joinToString(", ")} sorteado!"
+                        } else {
+                            winningDetails = "Duque de Dezenas incompleto"
+                        }
+                    }
+
+                    "Terno de Dezenas" -> {
+                        val dezenasBuscadas = aposta.dezenasSelecionadas
+                        val dezenasSorteadas = checkItems.map { it.dezena }.toSet()
+                        val hitAll = dezenasBuscadas.size >= 3 && dezenasBuscadas.all { it in dezenasSorteadas }
+                        isWin = hitAll
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (3000.0 / div)
+                            winningDetails = "Terno de Dezenas ${dezenasBuscadas.joinToString(", ")} sorteado!"
+                        } else {
+                            winningDetails = "Terno de Dezenas incompleto"
+                        }
+                    }
+
+                    "Centena" -> {
+                        val centenaBuscada = aposta.numeroApostado.trim()
+                        val matchItem = checkItems.find { it.centena == centenaBuscada }
+                        isWin = matchItem != null
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (600.0 / div)
+                            winningDetails = "Centena $centenaBuscada sorteada no ${matchItem?.position}"
+                        } else {
+                            winningDetails = "Centena $centenaBuscada não sorteada"
+                        }
+                    }
+
+                    "Milhar" -> {
+                        val milharBuscada = aposta.numeroApostado.trim()
+                        val matchItem = checkItems.find { it.milhar == milharBuscada }
+                        isWin = matchItem != null
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (4000.0 / div)
+                            winningDetails = "Milhar $milharBuscada sorteada no ${matchItem?.position}"
+                        } else {
+                            winningDetails = "Milhar $milharBuscada não sorteada"
+                        }
+                    }
+
+                    "Invertido" -> {
+                        val perms = aposta.combinacoesInvertidas.ifEmpty { generatePermutations(aposta.numeroApostado) }
+                        var matchedPerm: String? = null
+                        var matchPos: String? = null
+                        for (item in checkItems) {
+                            val found = perms.find { it == item.milhar || it == item.centena }
+                            if (found != null) {
+                                matchedPerm = found
+                                matchPos = item.position
+                                break
+                            }
+                        }
+                        isWin = matchedPerm != null
+                        if (isWin) {
+                            val numCombinations = perms.size.toDouble().coerceAtLeast(1.0)
+                            val baseMultiplier = if (aposta.numeroApostado.length == 3) 600.0 else 4000.0
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = (aposta.valorApostado / numCombinations) * (baseMultiplier / div)
+                            winningDetails = "Combinação $matchedPerm sorteada no $matchPos!"
+                        } else {
+                            winningDetails = "Nenhuma das ${perms.size} combinações foi sorteada"
+                        }
+                    }
+
+                    else -> {
+                        isWin = false
+                        winningDetails = "Não contemplado"
                     }
                 }
 
-                if (matches > 0) {
-                    val baseMultiplier = when (aposta.modalidade) {
-                        "Grupo" -> 18.0
-                        "Dezena" -> 60.0
-                        "Centena" -> 600.0
-                        "Milhar" -> 4000.0
-                        "Duque de Grupo" -> 18.5
-                        "Terno de Grupo" -> 130.0
-                        else -> 18.0
-                    }
-                    val divFactor = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
-                    val ganhoTotal = (aposta.valorApostado * (baseMultiplier / divFactor)) * matches
+                if (isWin) {
                     val pctLucro = ((ganhoTotal - aposta.valorApostado) / aposta.valorApostado) * 100.0
-
                     aposta.copy(
                         status = "GANHOU",
                         valorGanho = ganhoTotal,
                         porcentagemRetorno = pctLucro,
-                        detalheResultado = "Deu no Poste! Sorteado no ${matchingPositions.joinToString(", ")}"
+                        detalheResultado = "Deu no Poste! $winningDetails"
                     )
                 } else {
                     aposta.copy(
                         status = "PERDEU",
                         valorGanho = 0.0,
                         porcentagemRetorno = -100.0,
-                        detalheResultado = "Não deu no poste nesta extração"
+                        detalheResultado = winningDetails
                     )
                 }
             } else {
@@ -314,6 +430,19 @@ class MainViewModel : ViewModel() {
         }
 
         _apostas.value = updatedBets
+    }
+
+    fun generatePermutations(input: String): List<String> {
+        if (input.length <= 1) return listOf(input)
+        val permutations = mutableSetOf<String>()
+        for (i in input.indices) {
+            val char = input[i]
+            val remaining = input.substring(0, i) + input.substring(i + 1)
+            for (perm in generatePermutations(remaining)) {
+                permutations.add(char + perm)
+            }
+        }
+        return permutations.toList()
     }
 
     fun selectCryptoById(id: String) {

@@ -1,13 +1,13 @@
 package com.animalgame.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -43,26 +43,36 @@ fun BottomNavigationBar(
 
     val context = LocalContext.current
 
-    NavigationBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp
     ) {
-        items.forEach { item ->
-            val isSelected = currentRoute == item.route
-            val resId = context.resources.getIdentifier(
-                item.iconName,
-                "drawable",
-                context.packageName
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEach { item ->
+                val isSelected = currentRoute == item.route
+                val resId = context.resources.getIdentifier(
+                    item.iconName,
+                    "drawable",
+                    context.packageName
+                )
 
-            val activeColor = CryptoGreen
-            val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
+                val activeColor = CryptoGreen
+                val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onNavigate(item.route) },
-                icon = {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate(item.route) },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     if (resId != 0) {
                         Image(
                             painter = painterResource(id = resId),
@@ -80,8 +90,7 @@ fun BottomNavigationBar(
                             color = if (isSelected) activeColor else inactiveColor
                         )
                     }
-                },
-                label = {
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = item.title,
                         fontSize = 11.sp,
@@ -89,11 +98,8 @@ fun BottomNavigationBar(
                         color = if (isSelected) activeColor else inactiveColor,
                         maxLines = 1
                     )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = activeColor.copy(alpha = 0.15f)
-                )
-            )
+                }
+            }
         }
     }
 }

@@ -8,24 +8,41 @@ data class ApostaModel(
     val modalidade: String,
     val extracaoCode: String,
     val extracaoName: String,
-    val numeroApostado: String,
-    val nomeBicho: String,
-    val colocacao: String,
-    val valorApostado: Double,
+    val gruposSelecionados: List<Int> = emptyList(),
+    val dezenasSelecionadas: List<String> = emptyList(),
+    val numeroApostado: String = "",
+    val combinacoesInvertidas: List<String> = emptyList(),
+    val colocacao: String = "1º ao 5º Prêmio",
+    val valorApostado: Double = 10.0,
+    val nomeBicho: String = "",
     val status: String = "PENDENTE",
     val valorGanho: Double = 0.0,
     val porcentagemRetorno: Double = 0.0,
     val detalheResultado: String = ""
 ) : Parcelable {
+
+    val descricaoAposta: String
+        get() = when (modalidade) {
+            "Dupla de Grupo" -> "Grupos: ${gruposSelecionados.joinToString(", ")}"
+            "Terno de Grupo" -> "Grupos: ${gruposSelecionados.joinToString(", ")}"
+            "Duque de Dezenas" -> "Dezenas: ${dezenasSelecionadas.joinToString(", ")}"
+            "Terno de Dezenas" -> "Dezenas: ${dezenasSelecionadas.joinToString(", ")}"
+            "Invertido" -> "Nº $numeroApostado (${combinacoesInvertidas.size} combinações)"
+            else -> "Nº $numeroApostado ${if (nomeBicho.isNotBlank()) "($nomeBicho)" else ""}"
+        }
+
     constructor(parcel: Parcel) : this(
         id = parcel.readString() ?: "",
         modalidade = parcel.readString() ?: "",
         extracaoCode = parcel.readString() ?: "",
         extracaoName = parcel.readString() ?: "",
+        gruposSelecionados = parcel.createIntArray()?.toList() ?: emptyList(),
+        dezenasSelecionadas = parcel.createStringArrayList() ?: emptyList(),
         numeroApostado = parcel.readString() ?: "",
-        nomeBicho = parcel.readString() ?: "",
+        combinacoesInvertidas = parcel.createStringArrayList() ?: emptyList(),
         colocacao = parcel.readString() ?: "",
         valorApostado = parcel.readDouble(),
+        nomeBicho = parcel.readString() ?: "",
         status = parcel.readString() ?: "PENDENTE",
         valorGanho = parcel.readDouble(),
         porcentagemRetorno = parcel.readDouble(),
@@ -37,10 +54,13 @@ data class ApostaModel(
         parcel.writeString(modalidade)
         parcel.writeString(extracaoCode)
         parcel.writeString(extracaoName)
+        parcel.writeIntArray(gruposSelecionados.toIntArray())
+        parcel.writeStringList(dezenasSelecionadas)
         parcel.writeString(numeroApostado)
-        parcel.writeString(nomeBicho)
+        parcel.writeStringList(combinacoesInvertidas)
         parcel.writeString(colocacao)
         parcel.writeDouble(valorApostado)
+        parcel.writeString(nomeBicho)
         parcel.writeString(status)
         parcel.writeDouble(valorGanho)
         parcel.writeDouble(porcentagemRetorno)
