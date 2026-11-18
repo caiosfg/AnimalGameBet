@@ -2,7 +2,6 @@ package com.animalgame.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,13 +43,6 @@ fun HomeScreen(
     val lucroLiquido = totalGanho - totalApostado
     val saldoAtual = valorInicial + lucroLiquido
 
-    val totalInvestidoBase = if (valorInicial > 0) valorInicial else totalApostado
-    val porcentagemRetornoTotal = if (totalInvestidoBase > 0) {
-        (lucroLiquido / totalInvestidoBase) * 100.0
-    } else {
-        0.0
-    }
-
     val winsCount = apostas.count { it.status == "GANHOU" }
 
     Column(
@@ -61,7 +53,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // App Top Header
+        // App Top Header (Sem HOJE (0,00))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,24 +72,9 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "HOJE (0,00)",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
         }
 
-        // 1. BANCA & VALOR INICIAL DO DIA
+        // 1. BANCA & VALOR INICIAL DO DIA (Sem porcentagem +0,00%)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -108,32 +85,12 @@ fun HomeScreen(
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Saldo Atual Hoje",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (lucroLiquido >= 0) CryptoGreenBg else CryptoRedBg)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "${if (porcentagemRetornoTotal >= 0) "+" else ""}${String.format(Locale.US, "%.1f", porcentagemRetornoTotal)}%",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (lucroLiquido >= 0) CryptoGreen else CryptoRed
-                        )
-                    }
-                }
+                Text(
+                    text = "Saldo Atual Hoje",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -245,7 +202,7 @@ fun HomeScreen(
             }
         }
 
-        // 2. ATALHOS RÁPIDOS (Button estilizados)
+        // 2. ATALHOS RÁPIDOS
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)

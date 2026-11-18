@@ -39,8 +39,12 @@ class MainViewModel : ViewModel() {
     private val _tradeStatusMessage = MutableStateFlow<String?>(null)
     val tradeStatusMessage: StateFlow<String?> = _tradeStatusMessage.asStateFlow()
 
+    private fun getTodayDateString(): String {
+        return java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date())
+    }
+
     // Jogo do Bicho State
-    private val _currentBichoDate = MutableStateFlow("10/11/2026")
+    private val _currentBichoDate = MutableStateFlow(getTodayDateString())
     val currentBichoDate: StateFlow<String> = _currentBichoDate.asStateFlow()
 
     private val _isRefreshingBicho = MutableStateFlow(false)
@@ -54,6 +58,10 @@ class MainViewModel : ViewModel() {
 
     private val _bichoRecommendation = MutableStateFlow<BichoRecommendation?>(null)
     val bichoRecommendation: StateFlow<BichoRecommendation?> = _bichoRecommendation.asStateFlow()
+
+    // Tab Navigation State
+    private val _selectedTab = MutableStateFlow("home")
+    val selectedTab: StateFlow<String> = _selectedTab.asStateFlow()
 
     // Daily Bankroll & Bets State (Starts at 0.00)
     private val _valorInicialDia = MutableStateFlow(0.0)
@@ -205,7 +213,7 @@ class MainViewModel : ViewModel() {
             animalName = "Veado",
             dozenas = listOf(93, 94, 95, 96),
             confidencePercentage = 96,
-            reasoning = "Análise Deu no Poste (10/11/2026): O Veado (Grupo 24) saiu no 1º Prêmio da PTM e Federal. A probabilidade de repetição na Corujinha e PTV é altíssima conforme a tabela estatística de frequência.",
+            reasoning = "Análise Deu no Poste ($todayDate): O Veado (Grupo 24) saiu no 1º Prêmio da PTM e Federal. A probabilidade de repetição na Corujinha e PTV é altíssima conforme a tabela estatística de frequência.",
             suggestedMilhar = "4095",
             suggestedCentena = "095",
             puxadas = listOf("Cobra (09)", "Leão (16)", "Porco (18)", "Vaca (25)")
@@ -216,10 +224,14 @@ class MainViewModel : ViewModel() {
 
     fun recarregarDeuNoPoste(onFinish: () -> Unit = {}) {
         _isRefreshingBicho.value = true
-        _currentBichoDate.value = "10/11/2026"
+        _currentBichoDate.value = getTodayDateString()
         loadBichoData()
         _isRefreshingBicho.value = false
         onFinish()
+    }
+
+    fun selectTab(tab: String) {
+        _selectedTab.value = tab
     }
 
     fun setValorInicialDia(valor: Double) {
@@ -303,6 +315,40 @@ class MainViewModel : ViewModel() {
                             winningDetails = "Terno de Grupos ${gruposNecessarios.joinToString(", ")} sorteado!"
                         } else {
                             winningDetails = "Terno de Grupos não saiu completo"
+                        }
+                    }
+
+                    "Quadra de Grupo" -> {
+                        val gruposNecessarios = aposta.gruposSelecionados
+                        val gruposSorteados = checkItems.map { it.grupo }.toSet()
+                        val hitAll = gruposNecessarios.size >= 4 && gruposNecessarios.all { it in gruposSorteados }
+                        isWin = hitAll
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            ganhoTotal = aposta.valorApostado * (1000.0 / div)
+                            winningDetails = "Quadra de Grupos ${gruposNecessarios.joinToString(", ")} sorteada!"
+                        } else {
+                            winningDetails = "Quadra de Grupos não saiu completa"
+                        }
+                    }
+
+                    "Combinado Livre" -> {
+                        val gruposEscolhidos = aposta.gruposSelecionados
+                        val gruposSorteados = checkItems.map { it.grupo }.toSet()
+                        val gruposAcertados = gruposEscolhidos.filter { it in gruposSorteados }
+                        val numHits = gruposAcertados.size
+
+                        isWin = numHits >= 2
+                        if (isWin) {
+                            val div = if (maxPosIndex > 1) maxPosIndex.toDouble() else 1.0
+                            var mult = 0.0
+                            if (numHits >= 4) mult += 1000.0
+                            if (numHits >= 3) mult += 130.0
+                            if (numHits >= 2) mult += 18.5 * (numHits * (numHits - 1) / 2)
+                            ganhoTotal = aposta.valorApostado * (mult / div)
+                            winningDetails = "Jogo Combinado contemplado! $numHits bichos sorteados: ${gruposAcertados.joinToString(", ")}"
+                        } else {
+                            winningDetails = "Combinado com apenas $numHits acertos (mínimo 2 acertos)"
                         }
                     }
 

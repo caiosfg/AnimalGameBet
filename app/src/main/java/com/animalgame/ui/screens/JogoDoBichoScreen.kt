@@ -284,7 +284,7 @@ fun JogoDoBichoScreen(
             }
         }
 
-        // 2. DRAW RESULTS SECTION ("DEU NO POSTE - HOJE 10/11")
+        // 2. DRAW RESULTS SECTION ("DEU NO POSTE - HOJE")
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

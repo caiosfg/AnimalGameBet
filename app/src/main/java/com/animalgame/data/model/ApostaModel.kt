@@ -23,8 +23,10 @@ data class ApostaModel(
 
     val descricaoAposta: String
         get() = when (modalidade) {
-            "Dupla de Grupo" -> "Grupos: ${gruposSelecionados.joinToString(", ")}"
-            "Terno de Grupo" -> "Grupos: ${gruposSelecionados.joinToString(", ")}"
+            "Dupla de Grupo" -> "Dupla (${gruposSelecionados.joinToString(", ")})"
+            "Terno de Grupo" -> "Terno (${gruposSelecionados.joinToString(", ")})"
+            "Quadra de Grupo" -> "Quadra (${gruposSelecionados.joinToString(", ")})"
+            "Combinado Livre" -> "${gruposSelecionados.size} Bichos Combinados (${gruposSelecionados.joinToString(", ")})"
             "Duque de Dezenas" -> "Dezenas: ${dezenasSelecionadas.joinToString(", ")}"
             "Terno de Dezenas" -> "Dezenas: ${dezenasSelecionadas.joinToString(", ")}"
             "Invertido" -> "Nº $numeroApostado (${combinacoesInvertidas.size} combinações)"

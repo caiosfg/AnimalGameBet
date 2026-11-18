@@ -6,12 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,14 +42,14 @@ fun RegistrarJogoScreen(
     val context = LocalContext.current
     val apostas by viewModel.apostas.collectAsState()
 
-    var modalidade by remember { mutableStateOf("Grupo") }
+    var modalidade by remember { mutableStateOf("Combinado Livre") }
     var extracaoCode by remember { mutableStateOf("PT") }
     var extracaoName by remember { mutableStateOf("PT Rio (14:30)") }
     var colocacao by remember { mutableStateOf("1º ao 5º Prêmio") }
     var numeroApostado by remember { mutableStateOf("2581") }
     var valorText by remember { mutableStateOf("10.00") }
 
-    // Multi-selection for Grupos & Dezenas
+    // Multi-selection for Bichos & Dezenas
     val selectedGrupos = remember { mutableStateListOf<Int>() }
     val selectedDezenas = remember { mutableStateListOf<String>() }
 
@@ -59,9 +58,11 @@ fun RegistrarJogoScreen(
     var colocacaoDropdown by remember { mutableStateOf(false) }
 
     val modalidades = listOf(
-        "Grupo",
+        "Jogo Combinado Livre",
+        "Grupo Simples",
         "Dupla de Grupo",
         "Terno de Grupo",
+        "Quadra de Grupo",
         "Dezena",
         "Duque de Dezenas",
         "Terno de Dezenas",
@@ -123,6 +124,8 @@ fun RegistrarJogoScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = "Registrar Aposta",
@@ -131,12 +134,10 @@ fun RegistrarJogoScreen(
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = "Selecione o bicho pelas fotos oficiais (Galo, Touro, Tigre, Águia...)",
+            text = "Selecione múltiplos bichos pelas fotos para jogos combinados",
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         // Card Formulário de Registro
         Card(
@@ -284,91 +285,172 @@ fun RegistrarJogoScreen(
                     }
                 }
 
-                // SELEÇÃO VISUAL DOS 25 ANIMAIS (COM AS FOTOS DO RES/DRAWABLE)
+                // PAINEL RESUMO DA MULTISSELEÇÃO DE BICHOS
+                if (selectedGrupos.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(CryptoGreenBg)
+                            .border(1.dp, CryptoGreen, RoundedCornerShape(12.dp))
+                            .padding(10.dp)
+                    ) {
+                        Column {
+                            val nomesSel = selectedGrupos.mapNotNull { g -> bichoList.find { it.group == g }?.let { "G${String.format(Locale.US, "%02d", it.group)} ${it.name}" } }
+                            Text(
+                                text = "🐾 ${selectedGrupos.size} Bicho(s) Selecionado(s) para Jogo Combinado:",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = CryptoGreen
+                            )
+                            Text(
+                                text = nomesSel.joinToString(" • "),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            if (selectedGrupos.size >= 2) {
+                                val numBichos = selectedGrupos.size
+                                val duplasCount = numBichos * (numBichos - 1) / 2
+                                val ternosCount = if (numBichos >= 3) numBichos * (numBichos - 1) * (numBichos - 2) / 6 else 0
+                                Text(
+                                    text = "⚡ Gerando $duplasCount Duplas${if (ternosCount > 0) " + $ternosCount Ternos" else ""} de combinação!",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(top = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // SELEÇÃO VISUAL DOS 25 ANIMAIS EM GRID ILUSTRADA COM FOTOS
                 Text(
-                    text = "Selecione o Bicho na Tabela Ilustrada (${selectedGrupos.size} selecionado/s):",
+                    text = "Clique nas Fotos para Selecionar os Bichos (Multisseleção Ativa):",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(bichoList, key = { it.group }) { item ->
-                        val isSelected = selectedGrupos.contains(item.group)
-                        val resId = context.resources.getIdentifier(
-                            item.photoName.lowercase().trim(),
-                            "drawable",
-                            context.packageName
-                        )
+                // Grid de 2 Colunas com os 25 Bichos e suas Fotos
+                bichoList.chunked(2).forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        pair.forEach { item ->
+                            val selectedIndex = selectedGrupos.indexOf(item.group)
+                            val isSelected = selectedIndex != -1
+                            val resId = context.resources.getIdentifier(
+                                item.photoName.lowercase().trim(),
+                                "drawable",
+                                context.packageName
+                            )
 
-                        Box(
-                            modifier = Modifier
-                                .width(115.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(if (isSelected) CryptoGreenBg else MaterialTheme.colorScheme.background)
-                                .border(
-                                    2.dp,
-                                    if (isSelected) CryptoGreen else MaterialTheme.colorScheme.surfaceVariant,
-                                    RoundedCornerShape(14.dp)
-                                )
-                                .clickable {
-                                    if (modalidade.contains("Dupla")) {
-                                        if (isSelected) selectedGrupos.remove(item.group)
-                                        else if (selectedGrupos.size < 2) selectedGrupos.add(item.group)
-                                    } else if (modalidade.contains("Terno de Grupo")) {
-                                        if (isSelected) selectedGrupos.remove(item.group)
-                                        else if (selectedGrupos.size < 3) selectedGrupos.add(item.group)
-                                    } else {
-                                        selectedGrupos.clear()
-                                        selectedGrupos.add(item.group)
-                                        selectedDezenas.clear()
-                                        selectedDezenas.addAll(item.dezenas)
-                                        numeroApostado = item.dezenas.first()
-                                    }
-                                }
-                                .padding(8.dp)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                if (resId != 0) {
-                                    Image(
-                                        painter = painterResource(id = resId),
-                                        contentDescription = item.name,
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier
-                                            .size(56.dp)
-                                            .clip(RoundedCornerShape(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(if (isSelected) CryptoGreenBg else MaterialTheme.colorScheme.background)
+                                    .border(
+                                        2.dp,
+                                        if (isSelected) CryptoGreen else MaterialTheme.colorScheme.surfaceVariant,
+                                        RoundedCornerShape(14.dp)
                                     )
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(56.dp)
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text("G${String.format(Locale.US, "%02d", item.group)}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                    .clickable {
+                                        if (isSelected) {
+                                            selectedGrupos.remove(item.group)
+                                        } else {
+                                            val maxAllowed = when (modalidade) {
+                                                "Grupo Simples" -> 1
+                                                "Dupla de Grupo" -> 2
+                                                "Terno de Grupo" -> 3
+                                                "Quadra de Grupo" -> 4
+                                                else -> 10 // Combinado Livre permite até 10 bichos!
+                                            }
+
+                                            if (maxAllowed == 1) {
+                                                selectedGrupos.clear()
+                                                selectedGrupos.add(item.group)
+                                                selectedDezenas.clear()
+                                                selectedDezenas.addAll(item.dezenas)
+                                                numeroApostado = item.dezenas.first()
+                                            } else {
+                                                if (selectedGrupos.size < maxAllowed) {
+                                                    selectedGrupos.add(item.group)
+                                                } else {
+                                                    Toast.makeText(context, "Limite de $maxAllowed bichos para $modalidade atingido!", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding(8.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.TopStart) {
+                                        if (resId != 0) {
+                                            Image(
+                                                painter = painterResource(id = resId),
+                                                contentDescription = item.name,
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .size(54.dp)
+                                                    .clip(RoundedCornerShape(8.dp))
+                                            )
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(54.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("G${String.format(Locale.US, "%02d", item.group)}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                            }
+                                        }
+
+                                        if (isSelected) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .clip(CircleShape)
+                                                    .background(CryptoGreen),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = "${selectedIndex + 1}º",
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Column {
+                                        Text(
+                                            text = "G${String.format(Locale.US, "%02d", item.group)} • ${item.name}",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) CryptoGreen else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = item.dezenas.joinToString("-"),
+                                            fontSize = 10.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Text(
-                                    text = "G${String.format(Locale.US, "%02d", item.group)} • ${item.name}",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) CryptoGreen else MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1
-                                )
-
-                                Text(
-                                    text = item.dezenas.joinToString("-"),
-                                    fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
+                        }
+
+                        if (pair.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
@@ -424,9 +506,11 @@ fun RegistrarJogoScreen(
                             "Grupo $numeroApostado"
                         }
 
+                        val modSave = if (modalidade == "Jogo Combinado Livre") "Combinado Livre" else modalidade
+
                         val novaAposta = ApostaModel(
                             id = UUID.randomUUID().toString(),
-                            modalidade = modalidade,
+                            modalidade = modSave,
                             extracaoCode = extracaoCode,
                             extracaoName = extracaoName,
                             gruposSelecionados = selectedGrupos.toList(),
@@ -439,7 +523,7 @@ fun RegistrarJogoScreen(
                         )
 
                         viewModel.adicionarAposta(novaAposta)
-                        Toast.makeText(context, "Aposta ($modalidade) registrada e conferida com Deu no Poste!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Aposta combinada ($modSave) registrada e conferida com Deu no Poste!", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -450,7 +534,7 @@ fun RegistrarJogoScreen(
                     )
                 ) {
                     Text(
-                        text = "➕ CADASTRAR E CONFERIR COM DEU NO POSTE",
+                        text = "➕ CADASTRAR JOGO COMBINADO E CONFERIR",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -479,25 +563,21 @@ fun RegistrarJogoScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Nenhuma aposta cadastrada hoje.\nPreencha o formulário acima para conferir!",
+                    text = "Nenhuma aposta cadastrada hoje.\nSelecione os bichos e cadastre acima para conferir!",
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(apostas, key = { it.id }) { aposta ->
-                    CardApostaItem(
-                        aposta = aposta,
-                        onDelete = { viewModel.removerAposta(aposta.id) }
-                    )
-                }
+            apostas.forEach { aposta ->
+                CardApostaItem(
+                    aposta = aposta,
+                    onDelete = { viewModel.removerAposta(aposta.id) }
+                )
             }
         }
+
+        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 

@@ -1,10 +1,10 @@
 package com.animalgame.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,35 +42,30 @@ fun BottomNavigationBar(
     )
 
     val context = LocalContext.current
+    val selectedIndex = items.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
 
-    Surface(
+    TabRow(
+        selectedTabIndex = selectedIndex,
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 8.dp
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            items.forEach { item ->
-                val isSelected = currentRoute == item.route
-                val resId = context.resources.getIdentifier(
-                    item.iconName,
-                    "drawable",
-                    context.packageName
-                )
+        items.forEachIndexed { index, item ->
+            val isSelected = index == selectedIndex
+            val resId = context.resources.getIdentifier(
+                item.iconName,
+                "drawable",
+                context.packageName
+            )
 
-                val activeColor = CryptoGreen
-                val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
+            val activeColor = CryptoGreen
+            val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
 
+            Tab(
+                selected = isSelected,
+                onClick = { onNavigate(item.route) },
+                modifier = Modifier.padding(vertical = 10.dp)
+            ) {
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { onNavigate(item.route) },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (resId != 0) {

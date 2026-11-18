@@ -15,7 +15,7 @@ import com.animalgame.ui.viewmodel.MainViewModel
 fun AppNavigation(
     mainViewModel: MainViewModel = viewModel()
 ) {
-    var selectedTab by remember { mutableStateOf("home") }
+    val selectedTab by mainViewModel.selectedTab.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -23,7 +23,7 @@ fun AppNavigation(
             BottomNavigationBar(
                 currentRoute = selectedTab,
                 onNavigate = { route ->
-                    selectedTab = route
+                    mainViewModel.selectTab(route)
                 }
             )
         }
@@ -36,8 +36,8 @@ fun AppNavigation(
             when (selectedTab) {
                 "home" -> HomeScreen(
                     viewModel = mainViewModel,
-                    onNavigateToRegistrar = { selectedTab = "registrar" },
-                    onNavigateToResultados = { selectedTab = "bicho" }
+                    onNavigateToRegistrar = { mainViewModel.selectTab("registrar") },
+                    onNavigateToResultados = { mainViewModel.selectTab("bicho") }
                 )
                 "bicho" -> JogoDoBichoScreen(
                     viewModel = mainViewModel
